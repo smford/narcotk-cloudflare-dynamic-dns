@@ -17,7 +17,7 @@ var (
 
 func init() {
 	user = os.Getenv("CF_API_EMAIL")
-	domain = "narco.tk"
+	domain = os.Getenv("CF_DOMAIN")
 	apiKey = os.Getenv("CF_API_KEY")
 }
 
@@ -28,7 +28,6 @@ func main() {
 
 	newdnsrecord.Type = "A"
 	newdnsrecord.Name = "test1"
-	//newdnsrecord.Content = "82.34.44.205"
 	newdnsrecord.Content = string(ip[:len(ip)])
 	newdnsrecord.TTL = 300
 
@@ -45,7 +44,7 @@ func main() {
 		return
 	}
 
-	//localhost := cloudflare.DNSRecord{Content: "127.0.0.1"}
+	// localhost := cloudflare.DNSRecord{Content: "127.0.0.1"}
 
 	// Fetch all DNS records for example.org
 	recs, err := api.CreateDNSRecord(zoneID, newdnsrecord)
