@@ -12,6 +12,7 @@ var (
 	user         string
 	domain       string
 	apiKey       string
+	dnsname      string
 	newdnsrecord cloudflare.DNSRecord
 )
 
@@ -19,6 +20,7 @@ func init() {
 	user = os.Getenv("CF_API_EMAIL")
 	domain = os.Getenv("CF_DOMAIN")
 	apiKey = os.Getenv("CF_API_KEY")
+	dnsname = os.Getenv("CF_DNSNAME")
 }
 
 func main() {
@@ -27,7 +29,7 @@ func main() {
 	fmt.Println(string(ip[:len(ip)]))
 
 	newdnsrecord.Type = "A"
-	newdnsrecord.Name = "test1"
+	newdnsrecord.Name = dnsname
 	newdnsrecord.Content = string(ip[:len(ip)])
 	newdnsrecord.TTL = 300
 
@@ -46,7 +48,7 @@ func main() {
 
 	//findhost := cloudflare.DNSRecord{Content: "82.34.44.205"}
 
-	findhost := cloudflare.DNSRecord{Name: "test1" + "." + domain}
+	findhost := cloudflare.DNSRecord{Name: dnsname + "." + domain}
 
 	// Fetch all DNS records for example.org
 	recs, err := api.DNSRecords(zoneID, findhost)
@@ -62,6 +64,15 @@ func main() {
 			fmt.Println("current = new: ignoring")
 		} else {
 			fmt.Println("needs updating")
+
+			recs, err := api.CreateDNSRecord(zoneID, newdnsrecord)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+
+			fmt.Println(recs)
+
 		}
 
 	}
