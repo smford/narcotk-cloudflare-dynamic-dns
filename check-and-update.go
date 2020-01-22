@@ -55,9 +55,11 @@ func main() {
 	ip, _ := ioutil.ReadAll(res.Body)
 	fmt.Println(string(ip[:len(ip)]))
 
+	ipstring := string(ip[:len(ip)])
+
 	newdnsrecord.Type = "A"
 	newdnsrecord.Name = dnsname
-	newdnsrecord.Content = string(ip[:len(ip)])
+	newdnsrecord.Content = ipstring
 	newdnsrecord.TTL = 300
 
 	api, err := cloudflare.New(apiKey, user)
@@ -86,7 +88,10 @@ func main() {
 
 	for _, r := range recs {
 		fmt.Printf("%s: %s %s %d %s/%s\n", r.Name, r.Type, r.Content, r.TTL, r.CreatedOn, r.ModifiedOn)
+		fmt.Printf("last modified: %s\n", r.ModifiedOn)
+		// temportarily over ride dns record to be the real one for my home
 		newdnsrecord.Content = "82.34.44.205"
+
 		if r.Content == newdnsrecord.Content {
 			fmt.Println("current = new: ignoring")
 		} else {
