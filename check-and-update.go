@@ -1,11 +1,15 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	cloudflare "github.com/cloudflare/cloudflare-go"
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"sort"
 )
 
 var (
@@ -17,13 +21,36 @@ var (
 )
 
 func init() {
-	user = os.Getenv("CF_API_EMAIL")
-	domain = os.Getenv("CF_DOMAIN")
-	apiKey = os.Getenv("CF_API_KEY")
-	dnsname = os.Getenv("CF_DNSNAME")
+	flag.Bool("displayconfig", false, "Display configuration")
+	flag.String("domain", "narco.tk", "DNS Domain, default = narco.tk")
+	flag.String("host", "test1", "Hostname, default = test1")
+	viper.SetEnvPrefix("CF")
+	viper.BindEnv("API_EMAIL")
+	viper.BindEnv("API_KEY")
+	//flag.String("appid", "", "appid")
+
+	//user = viper.GetString("API_EMAIL")
+	//user = os.Getenv("CF_API_EMAIL")
+	//domain = os.Getenv("CF_DOMAIN")
+	//apiKey = os.Getenv("CF_API_KEY")
+	//dnsname = os.Getenv("CF_DNSNAME")
+
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+	viper.BindPFlags(pflag.CommandLine)
+
+	user = viper.GetString("API_EMAIL")
+	apiKey = viper.GetString("API_KEY")
+	domain = viper.GetString("domain")
+	dnsname = viper.GetString("host")
 }
 
 func main() {
+
+	if viper.GetBool("displayconfig") {
+		displayConfig()
+		os.Exit(0)
+	}
 	res, _ := http.Get("https://api.ipify.org")
 	ip, _ := ioutil.ReadAll(res.Body)
 	fmt.Println(string(ip[:len(ip)]))
@@ -75,5 +102,17 @@ func main() {
 
 		}
 
+	}
+}
+
+func displayConfig() {
+	allmysettings := viper.AllSettings()
+	var keys []string
+	for k := range allmysettings {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		fmt.Println("CONFIG:", k, ":", allmysettings[k])
 	}
 }
