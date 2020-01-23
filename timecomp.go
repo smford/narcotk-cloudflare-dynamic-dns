@@ -23,4 +23,30 @@ func main() {
 
 	t, _ := time.Parse(layoutCF, against)
 	fmt.Println("       :", t)
+
+	difference := x.Sub(t)
+
+	fmt.Println("difference:", difference)
+	fmt.Println("-seconds---------")
+	x = x.Truncate(time.Second)
+	t = t.Truncate(time.Second)
+	fmt.Println("   trunc now:", x)
+	fmt.Println("trunc parsed:", t)
+	fmt.Println("        diff:", x.Sub(t))
+
+	fmt.Println("-minutes---------")
+	x = x.Truncate(time.Minute)
+	t = t.Truncate(time.Minute)
+	fmt.Println("   trunc now:", x)
+	fmt.Println("trunc parsed:", t)
+	fmt.Println("        diff:", x.Sub(t))
+
+	check5start := time.Now().UTC()
+	check5end := time.Now().UTC()
+	check5end = check5end.Add(time.Minute * 5)
+
+	fmt.Println("-5 min difference---------")
+	fmt.Println("start:", check5start)
+	fmt.Println("  end:", check5end)
+
 }
