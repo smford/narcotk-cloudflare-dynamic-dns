@@ -29,6 +29,7 @@ var (
 func init() {
 	flag.Bool("displayconfig", false, "Display configuration")
 	flag.Bool("updatedns", false, "Update DNS")
+	flag.Bool("help", false, "Display Help")
 	flag.String("domain", "narco.tk", "DNS Domain, default = narco.tk")
 	flag.String("host", "test1", "Hostname, default = test1")
 	flag.Int("wait", 300, "Seconds to wait since last modificaiton")
@@ -47,14 +48,28 @@ func init() {
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
 
+	if viper.GetBool("help") {
+		displayHelp()
+		os.Exit(0)
+	}
+
 	user = viper.GetString("API_EMAIL")
 	apiKey = viper.GetString("API_KEY")
 	domain = viper.GetString("domain")
 	dnsname = viper.GetString("host")
 }
 
-func main() {
+func displayHelp() {
+	fmt.Println("\ncf-ddns - Dynamic DNS updater for Cloudflare\n")
+	fmt.Println("    --help                  Help")
+	fmt.Println("    --displayconfig         Display configurtation")
+	fmt.Println("    --domain                Domain")
+	fmt.Println("    --host                  Host")
+	fmt.Println("    --updatedns             Should I update the dns?")
+	fmt.Println("    --wait                  Seconds to wait since last modification")
+}
 
+func main() {
 	if viper.GetBool("displayconfig") {
 		displayConfig()
 		os.Exit(0)
