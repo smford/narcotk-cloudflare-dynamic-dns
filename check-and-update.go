@@ -23,6 +23,7 @@ var (
 	domain       string
 	apiKey       string
 	dnsname      string
+	ipstring     string
 	newdnsrecord cloudflare.DNSRecord
 )
 
@@ -32,10 +33,13 @@ func init() {
 	flag.Bool("help", false, "Display Help")
 	flag.String("domain", "narco.tk", "DNS Domain, default = narco.tk")
 	flag.String("host", "test1", "Hostname, default = test1")
+	flag.String("ipprovider", "ipify", "Provider of your external IP, \"ipify\",\"my-ip.io\" or \"myip.com\", default = ipify")
 	flag.Int("wait", 300, "Seconds to wait since last modificaiton")
 	viper.SetEnvPrefix("CF")
 	viper.BindEnv("API_EMAIL")
 	viper.BindEnv("API_KEY")
+	viper.BindEnv("HOST")
+	viper.BindEnv("DOMAIN")
 	//flag.String("appid", "", "appid")
 
 	//user = viper.GetString("API_EMAIL")
@@ -55,8 +59,8 @@ func init() {
 
 	user = viper.GetString("API_EMAIL")
 	apiKey = viper.GetString("API_KEY")
-	domain = viper.GetString("domain")
-	dnsname = viper.GetString("host")
+	domain = viper.GetString("DOMAIN")
+	dnsname = viper.GetString("HOST")
 }
 
 func displayHelp() {
@@ -65,6 +69,7 @@ func displayHelp() {
 	fmt.Println("    --displayconfig         Display configurtation")
 	fmt.Println("    --domain                Domain")
 	fmt.Println("    --host                  Host")
+	fmt.Println("    --ipprovider            Provider of your external IP, \"ipify\",\"my-ip.io\" or \"myip.com\", default = ipify")
 	fmt.Println("    --updatedns             Should I update the dns?")
 	fmt.Println("    --wait                  Seconds to wait since last modification")
 }
@@ -74,11 +79,21 @@ func main() {
 		displayConfig()
 		os.Exit(0)
 	}
-	res, _ := http.Get("https://api.ipify.org")
-	ip, _ := ioutil.ReadAll(res.Body)
-	fmt.Println(string(ip[:len(ip)]))
+	//res, _ := http.Get("https://api.ipify.org")
+	//ip, _ := ioutil.ReadAll(res.Body)
+	//fmt.Println(string(ip[:len(ip)]))
+	//ipstring := string(ip[:len(ip)])
 
-	ipstring := string(ip[:len(ip)])
+	//ipprovider := "ipify"
+	ipstring = getIP(viper.GetString("ipprovider"))
+	//fmt.Printf("%s     : %s\n", ipstring, ipprovider)
+	//ipprovider = "my-ip.io"
+	//ipstring = getIP(ipprovider)
+	//fmt.Printf("%s     : %s\n", ipstring, ipprovider)
+	//ipprovider = "myip.com"
+	//ipstring = getIP(ipprovider)
+	//fmt.Printf("%s     : %s\n", ipstring, ipprovider)
+	//os.Exit(0)
 
 	newdnsrecord.Type = "A"
 	newdnsrecord.Name = dnsname
@@ -161,4 +176,23 @@ func displayConfig() {
 	for _, k := range keys {
 		fmt.Println("CONFIG:", k, ":", allmysettings[k])
 	}
+}
+
+func getIP(ipprovider string) string {
+	switch ipprovider {
+	case "ipify":
+		res, _ := http.Get("https://api.ipify.org")
+		ip, _ := ioutil.ReadAll(res.Body)
+		return string(ip[:len(ip)])
+	case "my-ip.io":
+		res, _ := http.Get("https://api.my-ip.io/ip")
+		ip, _ := ioutil.ReadAll(res.Body)
+		return string(ip)
+	case "myip.com":
+		// https://api.myip.com
+		res, _ := http.Get("https://api.myip.com")
+		ip, _ := ioutil.ReadAll(res.Body)
+		return string(ip)
+	}
+	return ""
 }
