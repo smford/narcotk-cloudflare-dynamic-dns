@@ -124,6 +124,10 @@ func main() {
 		return
 	}
 
+	if len(recs) == 0 {
+		fmt.Printf("No record found for %s.%s, creating.\n", dnsname, domain)
+	}
+
 	for _, r := range recs {
 		fmt.Printf("%s: %s %s %d %s/%s\n", r.Name, r.Type, r.Content, r.TTL, r.CreatedOn, r.ModifiedOn)
 		fmt.Printf("last modified: %s\n", r.ModifiedOn)
