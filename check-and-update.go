@@ -45,6 +45,7 @@ func init() {
 	flag.Bool("help", false, "Display Help")
 	flag.String("host", "test1", "Hostname, default = test1")
 	flag.String("ipprovider", "aws", "Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
+	flag.Int("ttl", 300, "TTL in seconds for DNS record, default = 300")
 	flag.Bool("updatedns", false, "Update DNS")
 	flag.Int("wait", 300, "Seconds to wait since last modificaiton, default = 300")
 
@@ -83,6 +84,7 @@ func displayHelp() {
 	fmt.Println("    --help                  Help")
 	fmt.Println("    --host                  Host")
 	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
+	fmt.Println("    --ttl                   TTL in seconds for DNS record, default = 300")
 	fmt.Println("    --updatedns             Should I update the dns?")
 	fmt.Println("    --wait                  Seconds to wait since last modification, default = 300")
 }
@@ -109,7 +111,7 @@ func main() {
 	newdnsrecord.Type = "A"
 	newdnsrecord.Name = dnsname
 	newdnsrecord.Content = ipstring
-	newdnsrecord.TTL = 300
+	newdnsrecord.TTL = viper.GetInt("ttl")
 	newdnsrecord.Proxied = viper.GetBool("cfproxy")
 
 	api, err := cloudflare.New(apiKey, user)
