@@ -120,9 +120,6 @@ func main() {
 		return
 	}
 
-	//fmt.Printf("apitype=%R\n", api)
-
-	// Fetch the zone ID for zone example.org
 	zoneID, err := api.ZoneIDByName(domain)
 	if err != nil {
 		fmt.Println(err)
@@ -131,11 +128,9 @@ func main() {
 
 	fmt.Printf("zoneidtype=%T\n", zoneID)
 
-	//findhost := cloudflare.DNSRecord{Content: "82.34.44.205"}
-
 	findhost := cloudflare.DNSRecord{Name: dnsname + "." + domain}
 
-	// Fetch all DNS records for example.org
+	// Fetch all DNS records for example.org that match host
 	recs, err := api.DNSRecords(zoneID, findhost)
 	if err != nil {
 		fmt.Println(err)
@@ -152,8 +147,6 @@ func main() {
 		for _, r := range recs {
 			fmt.Printf("ID: %s %s: %s %s %d %s/%s\n", r.ID, r.Name, r.Type, r.Content, r.TTL, r.CreatedOn, r.ModifiedOn)
 			fmt.Printf("last modified: %s\n", r.ModifiedOn)
-			// temportarily over ride dns record to be the real one for my home
-			//newdnsrecord.Content = "82.34.44.205"
 
 			if r.Content == newdnsrecord.Content {
 				fmt.Println("current = new: ignoring")
@@ -217,14 +210,10 @@ func getIP(ipprovider string) string {
 		os.Exit(2)
 	}
 
-	//return string(ip[:len(ip)])
-	//return string(ip)
-
 	return returnip
 }
 
 func updatednsrecord(myapi cloudflare.API, zoneID string, recordID string, newdnsrecord cloudflare.DNSRecord) {
-	// zoneID, recordID string, rr DNSRecord
 	if viper.GetBool("updatedns") {
 		err := myapi.UpdateDNSRecord(zoneID, recordID, newdnsrecord)
 		if err != nil {
@@ -238,7 +227,6 @@ func updatednsrecord(myapi cloudflare.API, zoneID string, recordID string, newdn
 }
 
 func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflare.DNSRecord) {
-	//func updatednsrecord(myapi cloudflare.API, host string, domain string) {
 	if viper.GetBool("updatedns") {
 		recs, err := myapi.CreateDNSRecord(zoneID, newdnsrecord)
 		if err != nil {
