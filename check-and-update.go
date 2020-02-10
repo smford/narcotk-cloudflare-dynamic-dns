@@ -39,19 +39,19 @@ func init() {
 	flag.Bool("cfproxy", false, "Make Cloudflare proxy the record, default = false")
 	flag.Bool("debug", false, "Display debug information")
 	flag.Bool("displayconfig", false, "Display configuration")
+	flag.String("domain", "narco.tk", "DNS Domain, default = narco.tk")
 	flag.Bool("force", false, "Force update")
-	flag.Bool("updatedns", false, "Update DNS")
 	flag.Bool("getip", false, "Get external IPS, can be used with --ipprovider, or \"all\" for all providers")
 	flag.Bool("help", false, "Display Help")
-	flag.String("domain", "narco.tk", "DNS Domain, default = narco.tk")
 	flag.String("host", "test1", "Hostname, default = test1")
 	flag.String("ipprovider", "aws", "Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
+	flag.Bool("updatedns", false, "Update DNS")
 	flag.Int("wait", 300, "Seconds to wait since last modificaiton")
 	viper.SetEnvPrefix("CF")
 	viper.BindEnv("API_EMAIL")
 	viper.BindEnv("API_KEY")
-	viper.BindEnv("HOST")
 	viper.BindEnv("DOMAIN")
+	viper.BindEnv("HOST")
 	//flag.String("appid", "", "appid")
 
 	//user = viper.GetString("API_EMAIL")
@@ -71,10 +71,10 @@ func init() {
 		os.Exit(0)
 	}
 
-	user = viper.GetString("API_EMAIL")
 	apiKey = viper.GetString("API_KEY")
-	domain = viper.GetString("DOMAIN")
 	dnsname = viper.GetString("HOST")
+	domain = viper.GetString("DOMAIN")
+	user = viper.GetString("API_EMAIL")
 }
 
 func displayHelp() {
