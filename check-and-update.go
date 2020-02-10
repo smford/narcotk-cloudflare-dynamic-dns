@@ -46,7 +46,7 @@ func init() {
 	flag.String("host", "test1", "Hostname, default = test1")
 	flag.String("ipprovider", "aws", "Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
 	flag.Bool("updatedns", false, "Update DNS")
-	flag.Int("wait", 300, "Seconds to wait since last modificaiton")
+	flag.Int("wait", 300, "Seconds to wait since last modificaiton, default = 300")
 
 	viper.SetEnvPrefix("CF")
 	viper.BindEnv("API_EMAIL")
@@ -82,9 +82,9 @@ func displayHelp() {
 	fmt.Println("    --getip                 Get external IPS, can be used with --ipprovider, or \"all\" for all providers")
 	fmt.Println("    --help                  Help")
 	fmt.Println("    --host                  Host")
-	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"ip.io\", default = aws")
+	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
 	fmt.Println("    --updatedns             Should I update the dns?")
-	fmt.Println("    --wait                  Seconds to wait since last modification")
+	fmt.Println("    --wait                  Seconds to wait since last modification, default = 300")
 }
 
 func main() {
