@@ -78,17 +78,19 @@ func init() {
 }
 
 func displayHelp() {
-	fmt.Println("\ncf-ddns - Dynamic DNS updater for Cloudflare\n")
-	fmt.Println("    --help                  Help")
+	fmt.Println("")
+	fmt.Println("cf-ddns - Dynamic DNS updater for Cloudflare")
+	fmt.Println("")
+	fmt.Println("    --cfproxy               Make Cloudflare proxy the record, default = false")
 	fmt.Println("    --displayconfig         Display configurtation")
 	fmt.Println("    --domain                Domain")
 	fmt.Println("    --force                 Force update")
 	fmt.Println("    --getip                 Get external IPS, can be used with --ipprovider, or \"all\" for all providers")
+	fmt.Println("    --help                  Help")
 	fmt.Println("    --host                  Host")
 	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"ip.io\", default = aws")
 	fmt.Println("    --updatedns             Should I update the dns?")
 	fmt.Println("    --wait                  Seconds to wait since last modification")
-	fmt.Println("    --cfproxy               Make Cloudflare proxy the record, default = false")
 }
 
 func main() {
