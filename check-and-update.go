@@ -113,16 +113,6 @@ func main() {
 
 	ipstring = getIP(viper.GetString("ipprovider"))
 
-	//ipprovider := "ipify"
-	//fmt.Printf("%s     : %s\n", ipstring, ipprovider)
-	//ipprovider = "my-ip.io"
-	//ipstring = getIP(ipprovider)
-	//fmt.Printf("%s     : %s\n", ipstring, ipprovider)
-	//ipprovider = "myip.com"
-	//ipstring = getIP(ipprovider)
-	//fmt.Printf("%s     : %s\n", ipstring, ipprovider)
-	//os.Exit(0)
-
 	newdnsrecord.Type = "A"
 	newdnsrecord.Name = dnsname
 	newdnsrecord.Content = ipstring
