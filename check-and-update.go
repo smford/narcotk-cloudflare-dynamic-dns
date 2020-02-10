@@ -47,18 +47,12 @@ func init() {
 	flag.String("ipprovider", "aws", "Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
 	flag.Bool("updatedns", false, "Update DNS")
 	flag.Int("wait", 300, "Seconds to wait since last modificaiton")
+
 	viper.SetEnvPrefix("CF")
 	viper.BindEnv("API_EMAIL")
 	viper.BindEnv("API_KEY")
 	viper.BindEnv("DOMAIN")
 	viper.BindEnv("HOST")
-	//flag.String("appid", "", "appid")
-
-	//user = viper.GetString("API_EMAIL")
-	//user = os.Getenv("CF_API_EMAIL")
-	//domain = os.Getenv("CF_DOMAIN")
-	//apiKey = os.Getenv("CF_API_KEY")
-	//dnsname = os.Getenv("CF_DNSNAME")
 
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
