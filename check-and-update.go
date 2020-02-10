@@ -148,50 +148,45 @@ func main() {
 	}
 
 	if len(recs) == 0 {
-		fmt.Printf("No record found for %s.%s, creating.\n", dnsname, domain)
-	}
+		fmt.Printf("No record found for %s.%s, CREATING.\n", dnsname, domain)
+		creatednsrecord(*api, zoneID, newdnsrecord)
 
-	for _, r := range recs {
-		fmt.Printf("%s: %s %s %d %s/%s\n", r.Name, r.Type, r.Content, r.TTL, r.CreatedOn, r.ModifiedOn)
-		fmt.Printf("last modified: %s\n", r.ModifiedOn)
-		// temportarily over ride dns record to be the real one for my home
-		//newdnsrecord.Content = "82.34.44.205"
+	} else {
+		fmt.Println("UPDATING DNS RECORD")
 
-		if r.Content == newdnsrecord.Content {
-			fmt.Println("current = new: ignoring")
-		} else {
-			fmt.Println("needs updating")
+		for _, r := range recs {
+			fmt.Printf("ID: %s %s: %s %s %d %s/%s\n", r.ID, r.Name, r.Type, r.Content, r.TTL, r.CreatedOn, r.ModifiedOn)
+			fmt.Printf("last modified: %s\n", r.ModifiedOn)
+			// temportarily over ride dns record to be the real one for my home
+			//newdnsrecord.Content = "82.34.44.205"
 
-			lastmodified, _ := time.Parse(layoutCF, r.ModifiedOn.String())
-			timenow := time.Now().UTC()
-			timediff := timenow.Sub(lastmodified).Round(time.Second).Seconds()
+			if r.Content == newdnsrecord.Content {
+				fmt.Println("current = new: ignoring")
+			} else {
+				fmt.Println("needs updating")
 
-			fmt.Println("       now:", timenow)
-			fmt.Println("  modified:", lastmodified)
-			fmt.Println("difference:", timediff)
-			fmt.Println("      wait:", viper.GetInt("wait"))
+				lastmodified, _ := time.Parse(layoutCF, r.ModifiedOn.String())
+				timenow := time.Now().UTC()
+				timediff := timenow.Sub(lastmodified).Round(time.Second).Seconds()
 
-			if int64(timediff) >= int64(viper.GetInt("wait")) {
-				fmt.Printf("updating dns because it was last updated more than %d seconds ago and wait time set to %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
-				if viper.GetBool("updatedns") {
-					//recs, err := api.CreateDNSRecord(zoneID, newdnsrecord)
-					//if err != nil {
-					//	fmt.Println(err)
-					//	return
-					//}
-					//fmt.Println(recs)
+				fmt.Println("       now:", timenow)
+				fmt.Println("  modified:", lastmodified)
+				fmt.Println("difference:", timediff)
+				fmt.Println("      wait:", viper.GetInt("wait"))
+
+				if int64(timediff) >= int64(viper.GetInt("wait")) {
+					fmt.Printf("updating dns because it was last updated more than %d seconds ago and wait time set to %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
 					fmt.Println("newdnsrecord=", newdnsrecord)
-					updatednsrecord(*api, zoneID, newdnsrecord)
+					updatednsrecord(*api, zoneID, r.ID, newdnsrecord)
 				} else {
-					fmt.Println("updatedns=false")
+					fmt.Printf("not updating dns as it was only updated %d seconds ago\n", int64(timediff))
 				}
 
-			} else {
-				fmt.Printf("not updating dns as it was only updated %d seconds ago\n", int64(timediff))
 			}
 
 		}
 
+		// end updating record
 	}
 }
 
@@ -233,7 +228,21 @@ func getIP(ipprovider string) string {
 	return returnip
 }
 
-func updatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflare.DNSRecord) {
+func updatednsrecord(myapi cloudflare.API, zoneID string, recordID string, newdnsrecord cloudflare.DNSRecord) {
+	// zoneID, recordID string, rr DNSRecord
+	if viper.GetBool("updatedns") {
+		err := myapi.UpdateDNSRecord(zoneID, recordID, newdnsrecord)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("updated dns record")
+	} else {
+		fmt.Println("updatedns=false")
+	}
+}
+
+func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflare.DNSRecord) {
 	//func updatednsrecord(myapi cloudflare.API, host string, domain string) {
 	if viper.GetBool("updatedns") {
 		recs, err := myapi.CreateDNSRecord(zoneID, newdnsrecord)
@@ -242,6 +251,7 @@ func updatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflar
 			return
 		}
 		fmt.Println(recs)
+		fmt.Println("created dns record")
 	} else {
 		fmt.Println("updatedns=false")
 	}
