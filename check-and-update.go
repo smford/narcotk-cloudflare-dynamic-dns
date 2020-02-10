@@ -36,6 +36,7 @@ var (
 )
 
 func init() {
+	flag.Bool("cfproxy", false, "Make Cloudflare proxy the record, default = false")
 	flag.Bool("debug", false, "Display debug information")
 	flag.Bool("displayconfig", false, "Display configuration")
 	flag.Bool("updatedns", false, "Update DNS")
@@ -85,6 +86,7 @@ func displayHelp() {
 	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"ip.io\", default = aws")
 	fmt.Println("    --updatedns             Should I update the dns?")
 	fmt.Println("    --wait                  Seconds to wait since last modification")
+	fmt.Println("    --cfproxy               Make Cloudflare proxy the record, default = false")
 }
 
 func main() {
@@ -125,6 +127,7 @@ func main() {
 	newdnsrecord.Name = dnsname
 	newdnsrecord.Content = ipstring
 	newdnsrecord.TTL = 300
+	newdnsrecord.Proxied = viper.GetBool("cfproxy")
 
 	api, err := cloudflare.New(apiKey, user)
 	if err != nil {
