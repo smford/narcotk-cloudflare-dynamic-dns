@@ -20,13 +20,13 @@ const (
 )
 
 var (
-	user         string
-	dodebug      bool
-	domain       string
 	apiKey       string
 	dnsname      string
+	dodebug      bool
+	domain       string
 	ipstring     string
 	newdnsrecord cloudflare.DNSRecord
+	user         string
 
 	ipproviderlist = map[string]string{
 		"aws":      "https://checkip.amazonaws.com",
