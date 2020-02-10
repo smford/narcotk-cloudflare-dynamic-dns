@@ -92,10 +92,6 @@ func main() {
 		displayConfig()
 		os.Exit(0)
 	}
-	//res, _ := http.Get("https://api.ipify.org")
-	//ip, _ := ioutil.ReadAll(res.Body)
-	//fmt.Println(string(ip[:len(ip)]))
-	//ipstring := string(ip[:len(ip)])
 
 	if viper.GetBool("getip") {
 		if strings.ToLower(viper.GetString("ipprovider")) == "all" {
@@ -104,7 +100,6 @@ func main() {
 			}
 		} else {
 			fmt.Println(getIP(viper.GetString("ipprovider")))
-			//fmt.Println("this is the else")
 		}
 		os.Exit(0)
 	}
