@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -20,20 +21,29 @@ const (
 
 var (
 	user         string
+	dodebug      bool
 	domain       string
 	apiKey       string
 	dnsname      string
 	ipstring     string
 	newdnsrecord cloudflare.DNSRecord
+
+	ipproviderlist = map[string]string{
+		"aws":      "https://checkip.amazonaws.com",
+		"ipify":    "https://api.ipify.org",
+		"my-ip.io": "https://api.my-ip.io/ip",
+	}
 )
 
 func init() {
+	flag.Bool("debug", true, "Display debug information")
 	flag.Bool("displayconfig", false, "Display configuration")
 	flag.Bool("updatedns", false, "Update DNS")
+	flag.Bool("getip", false, "Get external IPS, can be used with --ipprovider, or \"all\" for all providers")
 	flag.Bool("help", false, "Display Help")
 	flag.String("domain", "narco.tk", "DNS Domain, default = narco.tk")
 	flag.String("host", "test1", "Hostname, default = test1")
-	flag.String("ipprovider", "ipify", "Provider of your external IP, \"ipify\",\"my-ip.io\" or \"myip.com\", default = ipify")
+	flag.String("ipprovider", "aws", "Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
 	flag.Int("wait", 300, "Seconds to wait since last modificaiton")
 	viper.SetEnvPrefix("CF")
 	viper.BindEnv("API_EMAIL")
@@ -52,6 +62,8 @@ func init() {
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
 
+	dodebug = viper.GetBool("debug")
+
 	if viper.GetBool("help") {
 		displayHelp()
 		os.Exit(0)
@@ -68,8 +80,9 @@ func displayHelp() {
 	fmt.Println("    --help                  Help")
 	fmt.Println("    --displayconfig         Display configurtation")
 	fmt.Println("    --domain                Domain")
+	fmt.Println("    --getip                 Get external IPS, can be used with --ipprovider, or \"all\" for all providers")
 	fmt.Println("    --host                  Host")
-	fmt.Println("    --ipprovider            Provider of your external IP, \"ipify\",\"my-ip.io\" or \"myip.com\", default = ipify")
+	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"ip.io\", default = aws")
 	fmt.Println("    --updatedns             Should I update the dns?")
 	fmt.Println("    --wait                  Seconds to wait since last modification")
 }
@@ -84,8 +97,21 @@ func main() {
 	//fmt.Println(string(ip[:len(ip)]))
 	//ipstring := string(ip[:len(ip)])
 
-	//ipprovider := "ipify"
+	if viper.GetBool("getip") {
+		if strings.ToLower(viper.GetString("ipprovider")) == "all" {
+			for k, v := range ipproviderlist {
+				fmt.Printf("%s [%s] %s\n", k, v, getIP(k))
+			}
+		} else {
+			fmt.Println(getIP(viper.GetString("ipprovider")))
+			//fmt.Println("this is the else")
+		}
+		os.Exit(0)
+	}
+
 	ipstring = getIP(viper.GetString("ipprovider"))
+
+	//ipprovider := "ipify"
 	//fmt.Printf("%s     : %s\n", ipstring, ipprovider)
 	//ipprovider = "my-ip.io"
 	//ipstring = getIP(ipprovider)
@@ -106,12 +132,16 @@ func main() {
 		return
 	}
 
+	//fmt.Printf("apitype=%R\n", api)
+
 	// Fetch the zone ID for zone example.org
 	zoneID, err := api.ZoneIDByName(domain)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	fmt.Printf("zoneidtype=%T\n", zoneID)
 
 	//findhost := cloudflare.DNSRecord{Content: "82.34.44.205"}
 
@@ -151,12 +181,14 @@ func main() {
 			if int64(timediff) >= int64(viper.GetInt("wait")) {
 				fmt.Printf("updating dns because it was last updated more than %d seconds ago and wait time set to %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
 				if viper.GetBool("updatedns") {
-					recs, err := api.CreateDNSRecord(zoneID, newdnsrecord)
-					if err != nil {
-						fmt.Println(err)
-						return
-					}
-					fmt.Println(recs)
+					//recs, err := api.CreateDNSRecord(zoneID, newdnsrecord)
+					//if err != nil {
+					//	fmt.Println(err)
+					//	return
+					//}
+					//fmt.Println(recs)
+					fmt.Println("newdnsrecord=", newdnsrecord)
+					updatednsrecord(*api, zoneID, newdnsrecord)
 				} else {
 					fmt.Println("updatedns=false")
 				}
@@ -183,20 +215,40 @@ func displayConfig() {
 }
 
 func getIP(ipprovider string) string {
-	switch ipprovider {
-	case "ipify":
-		res, _ := http.Get("https://api.ipify.org")
-		ip, _ := ioutil.ReadAll(res.Body)
-		return string(ip[:len(ip)])
-	case "my-ip.io":
-		res, _ := http.Get("https://api.my-ip.io/ip")
-		ip, _ := ioutil.ReadAll(res.Body)
-		return string(ip)
-	case "myip.com":
-		// https://api.myip.com
-		res, _ := http.Get("https://api.myip.com")
-		ip, _ := ioutil.ReadAll(res.Body)
-		return string(ip)
+	ipprovider = strings.ToLower(ipprovider)
+
+	res, err := http.Get(ipproviderlist[ipprovider])
+	ip, _ := ioutil.ReadAll(res.Body)
+
+	if dodebug {
+		fmt.Println("using: ", ipprovider)
+		fmt.Println("ip:", string(ip[:len(ip)]))
 	}
-	return ""
+
+	if err != nil {
+		fmt.Println("Cannot discern public IP:")
+		fmt.Println(err)
+		os.Exit(2)
+	}
+
+	//return string(ip[:len(ip)])
+	//return string(ip)
+
+	returnstring := string(ip[:len(ip)])
+	returnstring = strings.TrimSuffix(returnstring, "\n")
+	return returnstring
+}
+
+func updatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflare.DNSRecord) {
+	//func updatednsrecord(myapi cloudflare.API, host string, domain string) {
+	if viper.GetBool("updatedns") {
+		recs, err := myapi.CreateDNSRecord(zoneID, newdnsrecord)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(recs)
+	} else {
+		fmt.Println("updatedns=false")
+	}
 }
