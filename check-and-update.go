@@ -36,7 +36,7 @@ var (
 )
 
 func init() {
-	flag.Bool("debug", true, "Display debug information")
+	flag.Bool("debug", false, "Display debug information")
 	flag.Bool("displayconfig", false, "Display configuration")
 	flag.Bool("updatedns", false, "Update DNS")
 	flag.Bool("getip", false, "Get external IPS, can be used with --ipprovider, or \"all\" for all providers")
@@ -220,13 +220,16 @@ func getIP(ipprovider string) string {
 	res, err := http.Get(ipproviderlist[ipprovider])
 	ip, _ := ioutil.ReadAll(res.Body)
 
-	if dodebug {
+	returnip := string(ip[:len(ip)])
+	returnip = strings.TrimSuffix(returnip, "\n")
+
+	if dodebug == true {
 		fmt.Println("using: ", ipprovider)
-		fmt.Println("ip:", string(ip[:len(ip)]))
+		fmt.Println("ip:", returnip)
 	}
 
 	if err != nil {
-		fmt.Println("Cannot discern public IP:")
+		fmt.Printf("Cannot discern public IP using: %s", ipprovider)
 		fmt.Println(err)
 		os.Exit(2)
 	}
@@ -234,9 +237,7 @@ func getIP(ipprovider string) string {
 	//return string(ip[:len(ip)])
 	//return string(ip)
 
-	returnstring := string(ip[:len(ip)])
-	returnstring = strings.TrimSuffix(returnstring, "\n")
-	return returnstring
+	return returnip
 }
 
 func updatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflare.DNSRecord) {
