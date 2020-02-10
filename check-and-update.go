@@ -39,6 +39,7 @@ func init() {
 	flag.Bool("cfproxy", false, "Make Cloudflare proxy the record, default = false")
 	flag.Bool("debug", false, "Display debug information")
 	flag.Bool("displayconfig", false, "Display configuration")
+	flag.Bool("force", false, "Force update")
 	flag.Bool("updatedns", false, "Update DNS")
 	flag.Bool("getip", false, "Get external IPS, can be used with --ipprovider, or \"all\" for all providers")
 	flag.Bool("help", false, "Display Help")
@@ -81,6 +82,7 @@ func displayHelp() {
 	fmt.Println("    --help                  Help")
 	fmt.Println("    --displayconfig         Display configurtation")
 	fmt.Println("    --domain                Domain")
+	fmt.Println("    --force                 Force update")
 	fmt.Println("    --getip                 Get external IPS, can be used with --ipprovider, or \"all\" for all providers")
 	fmt.Println("    --host                  Host")
 	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"ip.io\", default = aws")
@@ -174,7 +176,7 @@ func main() {
 				fmt.Println("difference:", timediff)
 				fmt.Println("      wait:", viper.GetInt("wait"))
 
-				if int64(timediff) >= int64(viper.GetInt("wait")) {
+				if (int64(timediff) >= int64(viper.GetInt("wait"))) || viper.GetBool("force") {
 					fmt.Printf("updating dns because it was last updated more than %d seconds ago and wait time set to %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
 					fmt.Println("newdnsrecord=", newdnsrecord)
 					updatednsrecord(*api, zoneID, r.ID, newdnsrecord)
