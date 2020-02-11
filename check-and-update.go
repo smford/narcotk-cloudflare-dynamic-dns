@@ -120,8 +120,20 @@ func main() {
 	}
 
 	ipstring = getIP(viper.GetString("ipprovider"))
-	recordtype = validaterecordtype(viper.GetString("type"))
-	ttl = validatettl(viper.GetInt("ttl"))
+
+	if validaterecordtype(viper.GetString("type")) {
+		recordtype = strings.ToUpper(viper.GetString("type"))
+	} else {
+		fmt.Printf("--type %s is not valid\n", viper.GetString("type"))
+		os.Exit(1)
+	}
+
+	if validatettl(viper.GetInt("ttl")) {
+		ttl = viper.GetInt("ttl")
+	} else {
+		fmt.Printf("--ttl %d is not valid\n", viper.GetInt("ttl"))
+		os.Exit(1)
+	}
 
 	newdnsrecord.Type = recordtype
 	newdnsrecord.Name = dnsname
@@ -253,13 +265,21 @@ func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflar
 	}
 }
 
-func validatettl(checkttl int) int {
-	return checkttl
+func validatettl(checkttl int) bool {
+	fmt.Println("gotta validate ttl here")
+	return true
 }
 
-func validaterecordtype(recordtype string) string {
+func validaterecordtype(recordtype string) bool {
 	recordtype = strings.ToUpper(recordtype)
-	return recordtype
+
+	for _, item := range recordtypes {
+		if item == recordtype {
+			return true
+		}
+	}
+
+	return false
 }
 
 func displaytypelist() {
