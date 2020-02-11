@@ -108,6 +108,11 @@ func main() {
 		os.Exit(0)
 	}
 
+	if !validateipprovider(viper.GetString("ipprovider")) {
+		fmt.Printf("--ipprovider %s is not a valid provider\n", viper.GetString("ipprovider"))
+		os.Exit(1)
+	}
+
 	if viper.GetBool("getip") {
 		if strings.ToLower(viper.GetString("ipprovider")) == "all" {
 			for k, v := range ipproviderlist {
@@ -275,6 +280,22 @@ func validaterecordtype(recordtype string) bool {
 
 	for _, item := range recordtypes {
 		if item == recordtype {
+			return true
+		}
+	}
+
+	return false
+}
+
+func validateipprovider(ipname string) bool {
+	ipname = strings.ToLower(ipname)
+
+	if ipname == "all" {
+		return true
+	}
+
+	for k := range ipproviderlist {
+		if k == ipname {
 			return true
 		}
 	}
