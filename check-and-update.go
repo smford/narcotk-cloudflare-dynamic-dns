@@ -26,6 +26,8 @@ var (
 	domain       string
 	ipstring     string
 	newdnsrecord cloudflare.DNSRecord
+	recordtype   string
+	ttl          int
 	user         string
 
 	ipproviderlist = map[string]string{
@@ -33,6 +35,8 @@ var (
 		"ipify":    "https://api.ipify.org",
 		"my-ip.io": "https://api.my-ip.io/ip",
 	}
+
+	recordtypes = []string{"A", "AAAA", "CAA", "CERT", "CNAME", "DNSKEY", "DS", "LOC", "MX", "NAPTR", "NS", "PTR", "SMIMEA", "SPF", "SRV", "SSHFP", "TLSA", "TXT", "URI"}
 )
 
 func init() {
@@ -46,6 +50,8 @@ func init() {
 	flag.String("host", "test1", "Hostname, default = test1")
 	flag.String("ipprovider", "aws", "Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
 	flag.Int("ttl", 300, "TTL in seconds for DNS record, default = 300")
+	flag.String("type", "A", "Record type, default = \"A\"")
+	flag.Bool("typelist", false, "List record types")
 	flag.Bool("updatedns", false, "Update DNS")
 	flag.Int("wait", 300, "Seconds to wait since last modificaiton, default = 300")
 
@@ -85,6 +91,8 @@ func displayHelp() {
 	fmt.Println("    --host                  Host")
 	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
 	fmt.Println("    --ttl                   TTL in seconds for DNS record, default = 300")
+	fmt.Println("    --type                  Record type, default = \"A\"")
+	fmt.Println("    --typelist              List record types")
 	fmt.Println("    --updatedns             Should I update the dns?")
 	fmt.Println("    --wait                  Seconds to wait since last modification, default = 300")
 }
@@ -92,6 +100,11 @@ func displayHelp() {
 func main() {
 	if viper.GetBool("displayconfig") {
 		displayConfig()
+		os.Exit(0)
+	}
+
+	if viper.GetBool("typelist") {
+		displaytypelist()
 		os.Exit(0)
 	}
 
@@ -107,11 +120,13 @@ func main() {
 	}
 
 	ipstring = getIP(viper.GetString("ipprovider"))
+	recordtype = validaterecordtype(viper.GetString("type"))
+	ttl = validatettl(viper.GetInt("ttl"))
 
-	newdnsrecord.Type = "A"
+	newdnsrecord.Type = recordtype
 	newdnsrecord.Name = dnsname
 	newdnsrecord.Content = ipstring
-	newdnsrecord.TTL = viper.GetInt("ttl")
+	newdnsrecord.TTL = ttl
 	newdnsrecord.Proxied = viper.GetBool("cfproxy")
 
 	api, err := cloudflare.New(apiKey, user)
@@ -125,8 +140,6 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-
-	fmt.Printf("zoneidtype=%T\n", zoneID)
 
 	findhost := cloudflare.DNSRecord{Name: dnsname + "." + domain}
 
@@ -237,5 +250,21 @@ func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflar
 		fmt.Println("created dns record")
 	} else {
 		fmt.Println("updatedns=false")
+	}
+}
+
+func validatettl(checkttl int) int {
+	return checkttl
+}
+
+func validaterecordtype(recordtype string) string {
+	recordtype = strings.ToUpper(recordtype)
+	return recordtype
+}
+
+func displaytypelist() {
+	sort.Strings(recordtypes)
+	for i := 0; i < len(recordtypes); i++ {
+		fmt.Println(recordtypes[i])
 	}
 }
