@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"os"
 	"sort"
@@ -48,6 +49,7 @@ func init() {
 	flag.Bool("getip", false, "Get external IPS, can be used with --ipprovider, or \"all\" for all providers")
 	flag.Bool("help", false, "Display Help")
 	flag.String("host", "test1", "Hostname, default = test1")
+	flag.String("ipv4", "", "IPv4 address to use, rather than auto detecting it")
 	flag.String("ipprovider", "aws", "Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
 	flag.Int("ttl", 300, "TTL in seconds for DNS record, default = 300")
 	flag.String("type", "A", "Record type, default = \"A\"")
@@ -89,6 +91,7 @@ func displayHelp() {
 	fmt.Println("    --getip                 Get external IPS, can be used with --ipprovider, or \"all\" for all providers")
 	fmt.Println("    --help                  Help")
 	fmt.Println("    --host                  Host")
+	fmt.Println("    --ipv4                  IPv4 address to use, rather than auto detecting it")
 	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
 	fmt.Println("    --ttl                   TTL in seconds for DNS record, default = 300")
 	fmt.Println("    --type                  Record type, default = \"A\"")
@@ -124,7 +127,16 @@ func main() {
 		os.Exit(0)
 	}
 
-	ipstring = getIP(viper.GetString("ipprovider"))
+	if len(viper.GetString("ipv4")) == 0 {
+		ipstring = getIP(viper.GetString("ipprovider"))
+	} else {
+		if validateipv4(viper.GetString("ipv4")) {
+			ipstring = viper.GetString("ipv4")
+		} else {
+			fmt.Printf("--ipv4 %s is not a valid ip\n", viper.GetString("ipv4"))
+			os.Exit(1)
+		}
+	}
 
 	if validaterecordtype(viper.GetString("type")) {
 		recordtype = strings.ToUpper(viper.GetString("type"))
@@ -300,6 +312,14 @@ func validateipprovider(ipname string) bool {
 		}
 	}
 
+	return false
+}
+
+func validateipv4(ipv4 string) bool {
+	fmt.Println("validating ipv4 address")
+	if net.ParseIP(ipv4) != nil {
+		return true
+	}
 	return false
 }
 
