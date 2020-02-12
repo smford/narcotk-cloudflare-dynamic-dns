@@ -9,7 +9,7 @@ Suitable for running upon Linux, OSX, RaspberryPi and Ubiquiti Edgerouters
 
 - detects changes to your external IP and updates your cloudflare DNS entries
 - fully configurable
-- compatible with linux, osx, raspberry pi, ubiquiti edge routers + more
+- compatible with linux, osx, QNAP, raspberry pi, ubiquiti edge routers + more
 - clean and lean: a single binary, no mess and no further dependancies
 - simple to install and configure
 - IPv4 and IPv6 compatible
@@ -24,6 +24,7 @@ Suitable for running upon Linux, OSX, RaspberryPi and Ubiquiti Edgerouters
 | binaries/er-cavium | ERLite-3, ERPoE-5, ER-8, ERPro-8, EP-R8, ER-4, ER-6P, ER-12, ER-12P, ER-8-XG | Tested: ER-4 |
 | binaries/er-mediatek | ER-X, ER-10X, ER-X-SFP, ER-R6 | Untested |
 | binaries/osx | Yosemite, El Capitan, Sierra, High Sierra, Mojave, Catalina | Tested: all |
+| binaries/qnap | TS-453A | Untested |
 | binaries/rpi | Raspberry Pi Model B Rev 1 running Rasbian 9.8 | Tested |
 | binaries/x86_64 | Ubuntu 18.04.3 LTS | Tested |
 
