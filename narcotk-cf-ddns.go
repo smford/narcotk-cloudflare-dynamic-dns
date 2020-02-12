@@ -99,6 +99,7 @@ func displayHelp() {
 	fmt.Println("    --type                  Record type, default = \"A\"")
 	fmt.Println("    --typelist              List record types")
 	fmt.Println("    --wait                  Seconds to wait since last modification, default = 300")
+	fmt.Println("")
 }
 
 func main() {
@@ -179,7 +180,8 @@ func main() {
 	// Fetch all DNS records for example.org that match host
 	recs, err := api.DNSRecords(zoneID, findhost)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Could not retrieve DNS records: ", err)
+		os.Exit(1)
 		return
 	}
 
@@ -188,32 +190,47 @@ func main() {
 		creatednsrecord(*api, zoneID, newdnsrecord)
 
 	} else {
-		fmt.Println("UPDATING DNS RECORD")
+		if dodebug == true {
+			fmt.Println("UPDATING DNS RECORD")
+		}
 
 		for _, r := range recs {
-			fmt.Printf("ID: %s %s: %s %s %d %s/%s\n", r.ID, r.Name, r.Type, r.Content, r.TTL, r.CreatedOn, r.ModifiedOn)
-			fmt.Printf("last modified: %s\n", r.ModifiedOn)
+			if dodebug == true {
+				fmt.Printf("ID: %s %s: %s %s %d %s/%s\n", r.ID, r.Name, r.Type, r.Content, r.TTL, r.CreatedOn, r.ModifiedOn)
+				fmt.Printf("last modified: %s\n", r.ModifiedOn)
+			}
 
 			if r.Content == newdnsrecord.Content {
-				fmt.Println("current = new: ignoring")
+				if dodebug == true {
+					fmt.Println("DNS record up to date, not updating")
+				}
 			} else {
-				fmt.Println("needs updating")
+				if dodebug == true {
+					fmt.Println("DNS record needs updating")
+				}
 
 				lastmodified, _ := time.Parse(layoutCF, r.ModifiedOn.String())
 				timenow := time.Now().UTC()
 				timediff := timenow.Sub(lastmodified).Round(time.Second).Seconds()
 
-				fmt.Println("       now:", timenow)
-				fmt.Println("  modified:", lastmodified)
-				fmt.Println("difference:", timediff)
-				fmt.Println("      wait:", viper.GetInt("wait"))
+				if dodebug == true {
+					fmt.Println("Time difference information:")
+					fmt.Println("       now:", timenow)
+					fmt.Println("  modified:", lastmodified)
+					fmt.Println("difference:", timediff)
+					fmt.Println("      wait:", viper.GetInt("wait"))
+				}
 
 				if (int64(timediff) >= int64(viper.GetInt("wait"))) || viper.GetBool("force") {
-					fmt.Printf("updating dns because it was last updated more than %d seconds ago and wait time set to %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
-					fmt.Println("newdnsrecord=", newdnsrecord)
+					fmt.Printf("Updating DNS record because it was last updated more than %d seconds ago and wait time set to %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
+
+					if dodebug == true {
+						fmt.Println("newdnsrecord=", newdnsrecord)
+					}
+
 					updatednsrecord(*api, zoneID, r.ID, newdnsrecord)
 				} else {
-					fmt.Printf("not updating dns as it was only updated %d seconds ago\n", int64(timediff))
+					fmt.Printf("Not updating dns as it was only updated %d seconds ago\n", int64(timediff))
 				}
 
 			}
@@ -263,12 +280,13 @@ func updatednsrecord(myapi cloudflare.API, zoneID string, recordID string, newdn
 	if viper.GetBool("doit") {
 		err := myapi.UpdateDNSRecord(zoneID, recordID, newdnsrecord)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("Could not update DNS record:", err)
+			os.Exit(1)
 			return
 		}
-		fmt.Println("updated dns record")
+		fmt.Println("Updated DNS record: ", recordID)
 	} else {
-		fmt.Println("doit=false")
+		fmt.Println("Dry run complete")
 	}
 }
 
@@ -276,19 +294,22 @@ func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflar
 	if viper.GetBool("doit") {
 		recs, err := myapi.CreateDNSRecord(zoneID, newdnsrecord)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("Could not create DNS record: ", err)
+			os.Exit(1)
 			return
 		}
-		fmt.Println(recs)
-		fmt.Println("created dns record")
+
+		if dodebug == true {
+			fmt.Println(recs)
+		}
+
+		fmt.Println("Created dns record")
 	} else {
-		fmt.Println("doit=false")
+		fmt.Println("Dry run complete")
 	}
 }
 
 func validatettl(checkttl string) bool {
-	fmt.Println("validating ttl")
-
 	if strings.ToLower(checkttl) == "auto" {
 		return true
 	}
@@ -305,6 +326,7 @@ func validatettl(checkttl string) bool {
 
 func validaterecordtype(recordtype string) bool {
 	recordtype = strings.ToUpper(recordtype)
+
 	for _, item := range recordtypes {
 		if item == recordtype {
 			return true
@@ -331,10 +353,14 @@ func validateipprovider(ipname string) bool {
 }
 
 func validateipv4(ipv4 string) bool {
-	fmt.Println("validating ipv4 address")
+	if dodebug == true {
+		fmt.Println("Validating IPv4 address")
+	}
+
 	if net.ParseIP(ipv4) != nil {
 		return true
 	}
+
 	return false
 }
 
