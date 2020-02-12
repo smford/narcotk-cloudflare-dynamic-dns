@@ -45,6 +45,7 @@ func init() {
 	flag.Bool("cfproxy", false, "Make Cloudflare proxy the record, default = false")
 	flag.Bool("debug", false, "Display debug information")
 	flag.Bool("displayconfig", false, "Display configuration")
+	flag.Bool("doit", false, "Disable dry-run and make changes")
 	flag.String("domain", "narco.tk", "DNS Domain, default = narco.tk")
 	flag.Bool("force", false, "Force update")
 	flag.Bool("getip", false, "Get external IPS, can be used with --ipprovider, or \"all\" for all providers")
@@ -55,7 +56,6 @@ func init() {
 	flag.String("ttl", "300", "TTL in seconds (30-600, or auto) for DNS record, default = 300")
 	flag.String("type", "A", "Record type, default = \"A\"")
 	flag.Bool("typelist", false, "List record types")
-	flag.Bool("updatedns", false, "Update DNS")
 	flag.Int("wait", 300, "Seconds to wait since last modificaiton, default = 300")
 
 	viper.SetEnvPrefix("CF")
@@ -87,6 +87,7 @@ func displayHelp() {
 	fmt.Println("")
 	fmt.Println("    --cfproxy               Make Cloudflare proxy the record, default = false")
 	fmt.Println("    --displayconfig         Display configurtation")
+	fmt.Println("    --doit                  Disable dry-run and make changes")
 	fmt.Println("    --domain                Domain")
 	fmt.Println("    --force                 Force update")
 	fmt.Println("    --getip                 Get external IPS, can be used with --ipprovider, or \"all\" for all providers")
@@ -97,7 +98,6 @@ func displayHelp() {
 	fmt.Println("    --ttl                   TTL in seconds (30-600, or auto) for DNS record, default = 300")
 	fmt.Println("    --type                  Record type, default = \"A\"")
 	fmt.Println("    --typelist              List record types")
-	fmt.Println("    --updatedns             Should I update the dns?")
 	fmt.Println("    --wait                  Seconds to wait since last modification, default = 300")
 }
 
@@ -260,7 +260,7 @@ func getIP(ipprovider string) string {
 }
 
 func updatednsrecord(myapi cloudflare.API, zoneID string, recordID string, newdnsrecord cloudflare.DNSRecord) {
-	if viper.GetBool("updatedns") {
+	if viper.GetBool("doit") {
 		err := myapi.UpdateDNSRecord(zoneID, recordID, newdnsrecord)
 		if err != nil {
 			fmt.Println(err)
@@ -268,12 +268,12 @@ func updatednsrecord(myapi cloudflare.API, zoneID string, recordID string, newdn
 		}
 		fmt.Println("updated dns record")
 	} else {
-		fmt.Println("updatedns=false")
+		fmt.Println("doit=false")
 	}
 }
 
 func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflare.DNSRecord) {
-	if viper.GetBool("updatedns") {
+	if viper.GetBool("doit") {
 		recs, err := myapi.CreateDNSRecord(zoneID, newdnsrecord)
 		if err != nil {
 			fmt.Println(err)
@@ -282,7 +282,7 @@ func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflar
 		fmt.Println(recs)
 		fmt.Println("created dns record")
 	} else {
-		fmt.Println("updatedns=false")
+		fmt.Println("doit=false")
 	}
 }
 
