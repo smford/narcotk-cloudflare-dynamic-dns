@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	cloudflare "github.com/cloudflare/cloudflare-go"
@@ -53,6 +54,7 @@ func init() {
 	flag.String("host", "test1", "Hostname, default = test1")
 	flag.String("ipv4", "", "IPv4 address to use, rather than auto detecting it")
 	flag.String("ipprovider", "aws", "Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
+	flag.Bool("showcurrent", false, "Show current DNS record")
 	flag.String("ttl", "300", "TTL in seconds (30-600, or auto) for DNS record, default = 300")
 	flag.String("type", "A", "Record type, default = \"A\"")
 	flag.Bool("typelist", false, "List record types")
@@ -95,6 +97,7 @@ func displayHelp() {
 	fmt.Println("    --host                  Host")
 	fmt.Println("    --ipv4                  IPv4 address to use, rather than auto detecting it")
 	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
+	fmt.Println("    --showcurrent           Show current DNS record")
 	fmt.Println("    --ttl                   TTL in seconds (30-600, or auto) for DNS record, default = 300")
 	fmt.Println("    --type                  Record type, default = \"A\"")
 	fmt.Println("    --typelist              List record types")
@@ -198,6 +201,10 @@ func main() {
 			if dodebug == true {
 				fmt.Printf("ID: %s %s: %s %s %d %s/%s\n", r.ID, r.Name, r.Type, r.Content, r.TTL, r.CreatedOn, r.ModifiedOn)
 				fmt.Printf("last modified: %s\n", r.ModifiedOn)
+			}
+
+			if viper.GetBool("showcurrent") {
+				fmt.Println(prettyPrint(r))
 			}
 
 			if r.Content == newdnsrecord.Content {
@@ -369,4 +376,9 @@ func displaytypelist() {
 	for i := 0; i < len(recordtypes); i++ {
 		fmt.Println(recordtypes[i])
 	}
+}
+
+func prettyPrint(i interface{}) string {
+	s, _ := json.MarshalIndent(i, "", "\t")
+	return string(s)
 }
