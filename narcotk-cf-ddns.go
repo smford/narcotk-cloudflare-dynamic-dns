@@ -333,21 +333,6 @@ func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflar
 	}
 }
 
-func validatettl(checkttl string) bool {
-	if strings.ToLower(checkttl) == "auto" {
-		return true
-	}
-
-	tempttl, err := strconv.Atoi(checkttl)
-	if err == nil {
-		if (tempttl >= 30) && (tempttl <= 600) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func validaterecordtype(recordtype string) bool {
 	recordtype = strings.ToUpper(recordtype)
 
