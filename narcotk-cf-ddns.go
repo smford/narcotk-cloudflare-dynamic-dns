@@ -30,7 +30,7 @@ var (
 	ipstring     string
 	newdnsrecord cloudflare.DNSRecord
 	recordtype   string
-	ttl          string
+	ttl          int
 	user         string
 
 	ipproviderlist = map[string]string{
@@ -39,6 +39,21 @@ var (
 		"my-ip.io": "https://api.my-ip.io/ip",
 	}
 
+	ttltypes2 = map[string]int{
+		"auto": 0,
+		"2m":   120,
+		"5m":   300,
+		"10m":  600,
+		"15m":  900,
+		"30m":  1800,
+		"1h":   3600,
+		"2h":   7200,
+		"5h":   18000,
+		"12h":  43200,
+		"1d":   86400,
+	}
+
+	ttltypes    = []string{"auto", "2m", "5m", "10m", "15m", "30m", "1h", "2h", "5h", "12h", "1d"}
 	recordtypes = []string{"A", "AAAA", "CAA", "CERT", "CNAME", "DNSKEY", "DS", "LOC", "MX", "NAPTR", "NS", "PTR", "SMIMEA", "SPF", "SRV", "SSHFP", "TLSA", "TXT", "URI"}
 )
 
@@ -55,7 +70,7 @@ func init() {
 	flag.String("ipv4", "", "IPv4 address to use, rather than auto detecting it")
 	flag.String("ipprovider", "aws", "Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
 	flag.Bool("showcurrent", false, "Show current DNS record")
-	flag.String("ttl", "300", "TTL in seconds (30-600, or auto) for DNS record, default = 300")
+	flag.String("ttl", "5m", "TTL for DNS record. Valid choices: auto, 2m, 5m, 10m, 15m, 30m, 1h, 2h, 5h, 12h, 1d, default = \"5m\"")
 	flag.String("type", "A", "Record type, default = \"A\"")
 	flag.Bool("typelist", false, "List record types")
 	flag.Int("wait", 300, "Seconds to wait since last modificaiton, default = 300")
@@ -98,7 +113,7 @@ func displayHelp() {
 	fmt.Println("    --ipv4                  IPv4 address to use, rather than auto detecting it")
 	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
 	fmt.Println("    --showcurrent           Show current DNS record")
-	fmt.Println("    --ttl                   TTL in seconds (30-600, or auto) for DNS record, default = 300")
+	fmt.Println("    --ttl                   TTL for DNS record. Valid choices: auto, 2m, 5m, 10m, 15m, 30m, 1h, 2h, 5h, 12h, 1d, default = \"5m\"")
 	fmt.Println("    --type                  Record type, default = \"A\"")
 	fmt.Println("    --typelist              List record types")
 	fmt.Println("    --wait                  Seconds to wait since last modification, default = 300")
@@ -150,8 +165,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	if validatettl(viper.GetString("ttl")) {
-		ttl = viper.GetString("ttl")
+	if validatettl3(viper.GetString("ttl")) {
+		//ttl = viper.GetString("ttl")
+		ttl = ttltypes2[viper.GetString("ttl")]
+		fmt.Printf("ttl: %s / %d\n", viper.GetString("ttl"), ttl)
 	} else {
 		fmt.Printf("--ttl %s is not valid, must be between 30 and 600, or \"auto\"\n", viper.GetString("ttl"))
 		os.Exit(1)
@@ -162,8 +179,8 @@ func main() {
 	newdnsrecord.Content = ipstring
 	newdnsrecord.Proxied = viper.GetBool("cfproxy")
 
-	if strings.ToLower(ttl) != "auto" {
-		newdnsrecord.TTL, _ = strconv.Atoi(ttl)
+	if strings.ToLower(viper.GetString("ttl")) != "auto" {
+		newdnsrecord.TTL = ttl
 	}
 
 	api, err := cloudflare.New(apiKey, user)
@@ -381,4 +398,41 @@ func displaytypelist() {
 func prettyPrint(i interface{}) string {
 	s, _ := json.MarshalIndent(i, "", "\t")
 	return string(s)
+}
+
+func validatettl2(checkttl string) bool {
+	if dodebug {
+		fmt.Println("Validating TTL 2")
+	}
+	checkttl = strings.ToLower(checkttl)
+	if checkttl == "auto" {
+		return true
+	}
+
+	for _, item := range ttltypes {
+		if item == checkttl {
+			return true
+		}
+	}
+
+	return false
+}
+
+func validatettl3(checkttl string) bool {
+	if dodebug {
+		fmt.Println("Validating TTL 3")
+	}
+
+	checkttl = strings.ToLower(checkttl)
+	if checkttl == "auto" {
+		return true
+	}
+
+	for k := range ttltypes2 {
+		if k == checkttl {
+			return true
+		}
+	}
+
+	return false
 }
