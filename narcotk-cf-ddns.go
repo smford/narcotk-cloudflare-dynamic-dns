@@ -103,7 +103,7 @@ func displayHelp() {
 	fmt.Println("cf-ddns - Dynamic DNS updater for Cloudflare")
 	fmt.Println("")
 	fmt.Println("    --cfproxy               Make Cloudflare proxy the record, default = false")
-	fmt.Println("    --displayconfig         Display configurtation")
+	fmt.Println("    --displayconfig         Display configuration")
 	fmt.Println("    --doit                  Disable dry-run and make changes")
 	fmt.Println("    --domain                Domain")
 	fmt.Println("    --force                 Force update")
