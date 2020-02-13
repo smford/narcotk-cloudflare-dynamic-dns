@@ -176,6 +176,7 @@ func main() {
 	newdnsrecord.Name = dnsname
 	newdnsrecord.Content = ipstring
 	newdnsrecord.Proxied = viper.GetBool("cfproxy")
+	newdnsrecord.TTL = ttl
 
 	if strings.ToLower(viper.GetString("ttl")) != "auto" {
 		newdnsrecord.TTL = ttl
@@ -222,7 +223,48 @@ func main() {
 				fmt.Println(prettyPrint(r))
 			}
 
-			if r.Content == newdnsrecord.Content {
+			//======================
+			var changed = false
+
+			if strings.ToLower(r.Type) != strings.ToLower(newdnsrecord.Type) {
+				changed = true
+				if dodebug {
+					fmt.Printf("Type change: %s -> %s\n", r.Type, newdnsrecord.Type)
+				}
+			}
+
+			// this check is not needed, as the name is the primary identifier, any
+			// change to name will create aw new record and leave the old one in place
+			if strings.ToLower(r.Name) != (strings.ToLower(newdnsrecord.Name + "." + domain)) {
+				changed = true
+				if dodebug {
+					fmt.Printf("Name change: %s -> %s\n", r.Name, newdnsrecord.Name)
+				}
+			}
+
+			if r.Content != newdnsrecord.Content {
+				changed = true
+				if dodebug {
+					fmt.Printf("Content change: %s -> %s\n", r.Content, newdnsrecord.Content)
+				}
+			}
+
+			if r.Proxied != newdnsrecord.Proxied {
+				changed = true
+				if dodebug {
+					fmt.Printf("Proxied change: %t -> %t\n", r.Proxied, newdnsrecord.Proxied)
+				}
+			}
+
+			if r.TTL != newdnsrecord.TTL {
+				changed = true
+				if dodebug {
+					fmt.Printf("ttl changed: %d -> %d", r.TTL, newdnsrecord.TTL)
+				}
+			}
+			//======================
+
+			if changed == false {
 				if dodebug == true {
 					fmt.Println("DNS record up to date, not updating")
 				}
