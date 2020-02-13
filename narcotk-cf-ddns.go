@@ -39,7 +39,7 @@ var (
 		"my-ip.io": "https://api.my-ip.io/ip",
 	}
 
-	ttltypes2 = map[string]int{
+	ttltypes = map[string]int{
 		"auto": 0,
 		"2m":   120,
 		"5m":   300,
@@ -53,7 +53,6 @@ var (
 		"1d":   86400,
 	}
 
-	ttltypes    = []string{"auto", "2m", "5m", "10m", "15m", "30m", "1h", "2h", "5h", "12h", "1d"}
 	recordtypes = []string{"A", "AAAA", "CAA", "CERT", "CNAME", "DNSKEY", "DS", "LOC", "MX", "NAPTR", "NS", "PTR", "SMIMEA", "SPF", "SRV", "SSHFP", "TLSA", "TXT", "URI"}
 )
 
@@ -167,7 +166,7 @@ func main() {
 
 	if validatettl(viper.GetString("ttl")) {
 		//ttl = viper.GetString("ttl")
-		ttl = ttltypes2[viper.GetString("ttl")]
+		ttl = ttltypes[viper.GetString("ttl")]
 		fmt.Printf("ttl: %s / %d\n", viper.GetString("ttl"), ttl)
 	} else {
 		fmt.Printf("--ttl %s is not valid, must be between 30 and 600, or \"auto\"\n", viper.GetString("ttl"))
@@ -395,7 +394,7 @@ func validatettl(checkttl string) bool {
 		return true
 	}
 
-	for k := range ttltypes2 {
+	for k := range ttltypes {
 		if k == checkttl {
 			return true
 		}
