@@ -165,7 +165,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if validatettl3(viper.GetString("ttl")) {
+	if validatettl(viper.GetString("ttl")) {
 		//ttl = viper.GetString("ttl")
 		ttl = ttltypes2[viper.GetString("ttl")]
 		fmt.Printf("ttl: %s / %d\n", viper.GetString("ttl"), ttl)
@@ -385,7 +385,7 @@ func prettyPrint(i interface{}) string {
 	return string(s)
 }
 
-func validatettl3(checkttl string) bool {
+func validatettl(checkttl string) bool {
 	if dodebug {
 		fmt.Println("Validating TTL 3")
 	}
