@@ -385,24 +385,6 @@ func prettyPrint(i interface{}) string {
 	return string(s)
 }
 
-func validatettl2(checkttl string) bool {
-	if dodebug {
-		fmt.Println("Validating TTL 2")
-	}
-	checkttl = strings.ToLower(checkttl)
-	if checkttl == "auto" {
-		return true
-	}
-
-	for _, item := range ttltypes {
-		if item == checkttl {
-			return true
-		}
-	}
-
-	return false
-}
-
 func validatettl3(checkttl string) bool {
 	if dodebug {
 		fmt.Println("Validating TTL 3")
