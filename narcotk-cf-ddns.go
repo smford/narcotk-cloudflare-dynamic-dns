@@ -374,6 +374,10 @@ func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflar
 }
 
 func validaterecordtype(recordtype string) bool {
+	if dodebug == true {
+		fmt.Println("Validating: --type ", recordtype)
+	}
+
 	recordtype = strings.ToUpper(recordtype)
 
 	for _, item := range recordtypes {
@@ -386,6 +390,10 @@ func validaterecordtype(recordtype string) bool {
 }
 
 func validateipprovider(ipname string) bool {
+	if dodebug == true {
+		fmt.Println("Validating: --iprovider ", ipname)
+	}
+
 	ipname = strings.ToLower(ipname)
 
 	if ipname == "all" {
@@ -403,7 +411,7 @@ func validateipprovider(ipname string) bool {
 
 func validateipv4(ipv4 string) bool {
 	if dodebug == true {
-		fmt.Println("Validating IPv4 address")
+		fmt.Println("Validatingi: --ipv4 ", ipv4)
 	}
 
 	if net.ParseIP(ipv4) != nil {
@@ -427,7 +435,7 @@ func prettyPrint(i interface{}) string {
 
 func validatettl(checkttl string) bool {
 	if dodebug {
-		fmt.Println("Validating TTL 3")
+		fmt.Println("Validating: --ttl ", checkttl)
 	}
 
 	checkttl = strings.ToLower(checkttl)
