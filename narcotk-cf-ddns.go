@@ -94,6 +94,11 @@ func init() {
 	dnsname = viper.GetString("HOST")
 	domain = viper.GetString("DOMAIN")
 	user = viper.GetString("API_EMAIL")
+
+	// if we are forcing things, we also want to --doit
+	if viper.GetBool("force") {
+		viper.Set("doit", true)
+	}
 }
 
 func displayHelp() {
