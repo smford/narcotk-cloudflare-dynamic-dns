@@ -164,9 +164,7 @@ func main() {
 	}
 
 	if validatettl(viper.GetString("ttl")) {
-		//ttl = viper.GetString("ttl")
 		ttl = ttltypes[viper.GetString("ttl")]
-		fmt.Printf("ttl: %s / %d\n", viper.GetString("ttl"), ttl)
 	} else {
 		fmt.Printf("--ttl %s is not valid, must be between 30 and 600, or \"auto\"\n", viper.GetString("ttl"))
 		os.Exit(1)
