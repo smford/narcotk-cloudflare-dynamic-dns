@@ -223,7 +223,6 @@ func main() {
 				fmt.Println(prettyPrint(r))
 			}
 
-			//======================
 			var changed = false
 
 			if strings.ToLower(r.Type) != strings.ToLower(newdnsrecord.Type) {
@@ -259,10 +258,9 @@ func main() {
 			if r.TTL != newdnsrecord.TTL {
 				changed = true
 				if dodebug {
-					fmt.Printf("ttl changed: %d -> %d", r.TTL, newdnsrecord.TTL)
+					fmt.Printf("TTL change: %d -> %d\n", r.TTL, newdnsrecord.TTL)
 				}
 			}
-			//======================
 
 			if changed == false {
 				if dodebug == true {
@@ -285,18 +283,28 @@ func main() {
 					fmt.Println("      wait:", viper.GetInt("wait"))
 				}
 
-				if (int64(timediff) >= int64(viper.GetInt("wait"))) || viper.GetBool("force") {
-					fmt.Printf("Updating DNS record because it was last updated more than %d seconds ago and wait time set to %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
-
-					if dodebug == true {
-						fmt.Println("newdnsrecord=", newdnsrecord)
-					}
-
-					updatednsrecord(*api, zoneID, r.ID, newdnsrecord)
-				} else {
-					fmt.Printf("Not updating dns as it was only updated %d seconds ago\n", int64(timediff))
+				var tooquick = false
+				if int64(timediff) < int64(viper.GetInt("wait")) {
+					tooquick = true
 				}
 
+				// if forced OR updates aren't too quick do an update
+				if viper.GetBool("force") || !tooquick {
+
+					if viper.GetBool("force") {
+						fmt.Println("--force updating")
+						if tooquick {
+							fmt.Println("tooquick, but --force given")
+						}
+					}
+					fmt.Printf("Record last updated %d seconds ago, wait time set to %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
+					if dodebug {
+						fmt.Println(prettyPrint(newdnsrecord))
+					}
+					updatednsrecord(*api, zoneID, r.ID, newdnsrecord)
+				} else {
+					fmt.Printf("Not updating record because it was last updated %d seconds ago and wait time set to %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
+				}
 			}
 
 		}
