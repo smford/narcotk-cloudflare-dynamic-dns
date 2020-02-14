@@ -72,7 +72,7 @@ func init() {
 	flag.String("ttl", "5m", "TTL for DNS record. Valid choices: auto, 2m, 5m, 10m, 15m, 30m, 1h, 2h, 5h, 12h, 1d, default = \"5m\"")
 	flag.String("type", "A", "Record type, default = \"A\"")
 	flag.Bool("typelist", false, "List record types")
-	flag.Int("wait", 300, "Seconds to wait since last modificaiton, default = 300")
+	flag.Int("wait", 300, "Seconds to wait since last modification, default = 300")
 
 	viper.SetEnvPrefix("CF")
 	viper.BindEnv("API_EMAIL")
@@ -308,7 +308,7 @@ func main() {
 						if dodebug {
 							fmt.Println("Enabled: --force")
 							if tooquick {
-								fmt.Println("Update being forced when less than laste change occured within wait time")
+								fmt.Println("Update being forced when less than laste change occurred within wait time")
 							}
 						}
 					}
