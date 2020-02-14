@@ -208,18 +208,17 @@ func main() {
 	}
 
 	if len(recs) == 0 {
-		fmt.Printf("No record found for %s.%s, CREATING.\n", dnsname, domain)
+		fmt.Printf("No record found for %s.%s, Creating DNS Record.\n", dnsname, domain)
 		creatednsrecord(*api, zoneID, newdnsrecord)
 
 	} else {
 		if dodebug {
-			fmt.Println("UPDATING DNS RECORD")
+			fmt.Println("Updating DNS Record")
 		}
 
 		for _, r := range recs {
 			if dodebug {
-				fmt.Printf("ID: %s %s: %s %s %d %s/%s\n", r.ID, r.Name, r.Type, r.Content, r.TTL, r.CreatedOn, r.ModifiedOn)
-				fmt.Printf("last modified: %s\n", r.ModifiedOn)
+				fmt.Printf("ID:%s Name:%s Type:%s Content:%s TTL:%d Created:%s Modified:%s\n", r.ID, r.Name, r.Type, r.Content, r.TTL, r.CreatedOn, r.ModifiedOn)
 			}
 
 			if viper.GetBool("showcurrent") {
@@ -281,13 +280,15 @@ func main() {
 
 				if dodebug {
 					fmt.Println("Time difference information:")
-					fmt.Println("       now:", timenow)
-					fmt.Println("  modified:", lastmodified)
-					fmt.Println("difference:", timediff)
-					fmt.Println("      wait:", viper.GetInt("wait"))
+					fmt.Println("       Now:", timenow)
+					fmt.Println("  Modified:", lastmodified)
+					fmt.Println("Difference:", timediff)
+					fmt.Println("      Wait:", viper.GetInt("wait"))
 				}
 
 				var tooquick = false
+
+				// tooquick=true when timedifference is less then wait time
 				if int64(timediff) < int64(viper.GetInt("wait")) {
 					tooquick = true
 				}
@@ -383,7 +384,7 @@ func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflar
 			fmt.Println(recs)
 		}
 
-		fmt.Println("Created dns record")
+		fmt.Println("Created DNS record")
 	} else {
 		fmt.Println("Dry run complete")
 	}
