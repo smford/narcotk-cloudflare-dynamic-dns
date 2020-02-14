@@ -209,12 +209,12 @@ func main() {
 		creatednsrecord(*api, zoneID, newdnsrecord)
 
 	} else {
-		if dodebug == true {
+		if dodebug {
 			fmt.Println("UPDATING DNS RECORD")
 		}
 
 		for _, r := range recs {
-			if dodebug == true {
+			if dodebug {
 				fmt.Printf("ID: %s %s: %s %s %d %s/%s\n", r.ID, r.Name, r.Type, r.Content, r.TTL, r.CreatedOn, r.ModifiedOn)
 				fmt.Printf("last modified: %s\n", r.ModifiedOn)
 			}
@@ -263,11 +263,11 @@ func main() {
 			}
 
 			if changed == false {
-				if dodebug == true {
+				if dodebug {
 					fmt.Println("DNS record up to date, not updating")
 				}
 			} else {
-				if dodebug == true {
+				if dodebug {
 					fmt.Println("DNS record needs updating")
 				}
 
@@ -275,7 +275,7 @@ func main() {
 				timenow := time.Now().UTC()
 				timediff := timenow.Sub(lastmodified).Round(time.Second).Seconds()
 
-				if dodebug == true {
+				if dodebug {
 					fmt.Println("Time difference information:")
 					fmt.Println("       now:", timenow)
 					fmt.Println("  modified:", lastmodified)
@@ -334,7 +334,7 @@ func getIP(ipprovider string) string {
 	returnip := string(ip[:len(ip)])
 	returnip = strings.TrimSuffix(returnip, "\n")
 
-	if dodebug == true {
+	if dodebug {
 		fmt.Println("using: ", ipprovider)
 		fmt.Println("ip:", returnip)
 	}
@@ -371,7 +371,7 @@ func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflar
 			return
 		}
 
-		if dodebug == true {
+		if dodebug {
 			fmt.Println(recs)
 		}
 
@@ -382,7 +382,7 @@ func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflar
 }
 
 func validaterecordtype(recordtype string) bool {
-	if dodebug == true {
+	if dodebug {
 		fmt.Println("Validating: --type ", recordtype)
 	}
 
@@ -398,7 +398,7 @@ func validaterecordtype(recordtype string) bool {
 }
 
 func validateipprovider(ipname string) bool {
-	if dodebug == true {
+	if dodebug {
 		fmt.Println("Validating: --iprovider ", ipname)
 	}
 
@@ -418,7 +418,7 @@ func validateipprovider(ipname string) bool {
 }
 
 func validateipv4(ipv4 string) bool {
-	if dodebug == true {
+	if dodebug {
 		fmt.Println("Validatingi: --ipv4 ", ipv4)
 	}
 
