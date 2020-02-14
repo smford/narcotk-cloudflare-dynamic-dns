@@ -43,6 +43,12 @@ Suitable for running upon Linux, OSX, RaspberryPi and Ubiquiti Edgerouters
 ### Edgerouter
 
 ### Git
+```
+git clone git@github.com:smford/narcotk-cloudflare-dynamic-dns.git
+cd narcotk-cloudflare-dynamic-dns
+GO111MODULE=on go build narcotk-cf-ddns.go
+```
+
 
 ### GO
 
