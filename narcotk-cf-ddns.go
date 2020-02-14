@@ -68,6 +68,7 @@ func init() {
 	flag.String("ipv4", "", "IPv4 address to use, rather than auto detecting it")
 	flag.String("ipprovider", "aws", "Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
 	flag.Bool("showcurrent", false, "Show current DNS record")
+	flag.Bool("shownew", false, "Show new/updated DNS record")
 	flag.String("ttl", "5m", "TTL for DNS record. Valid choices: auto, 2m, 5m, 10m, 15m, 30m, 1h, 2h, 5h, 12h, 1d, default = \"5m\"")
 	flag.String("type", "A", "Record type, default = \"A\"")
 	flag.Bool("typelist", false, "List record types")
@@ -116,6 +117,7 @@ func displayHelp() {
 	fmt.Println("    --ipv4                  IPv4 address to use, rather than auto detecting it")
 	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
 	fmt.Println("    --showcurrent           Show current DNS record")
+	fmt.Println("    --shownew               Show new/updated DNS record")
 	fmt.Println("    --ttl                   TTL for DNS record. Valid choices: auto, 2m, 5m, 10m, 15m, 30m, 1h, 2h, 5h, 12h, 1d, default = \"5m\"")
 	fmt.Println("    --type                  Record type, default = \"A\"")
 	fmt.Println("    --typelist              List record types")
@@ -209,6 +211,12 @@ func main() {
 
 	if len(recs) == 0 {
 		fmt.Printf("No record found for %s.%s, Creating DNS Record.\n", dnsname, domain)
+
+		if dodebug || viper.GetBool("shownew") {
+			fmt.Println("New DNS Record:")
+			fmt.Println(prettyPrint(newdnsrecord))
+		}
+
 		creatednsrecord(*api, zoneID, newdnsrecord)
 
 	} else {
@@ -306,8 +314,8 @@ func main() {
 					}
 
 					fmt.Printf("Record last updated %d seconds ago, wait time currently %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
-					if dodebug {
-						fmt.Println("New DNS Record:")
+					if dodebug || viper.GetBool("shownew") {
+						fmt.Println("Updated DNS Record:")
 						fmt.Println(prettyPrint(newdnsrecord))
 					}
 					updatednsrecord(*api, zoneID, r.ID, newdnsrecord)
