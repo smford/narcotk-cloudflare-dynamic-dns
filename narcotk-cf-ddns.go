@@ -202,7 +202,7 @@ func main() {
 	// Fetch all DNS records for example.org that match host
 	recs, err := api.DNSRecords(zoneID, findhost)
 	if err != nil {
-		fmt.Println("Could not retrieve DNS records: ", err)
+		fmt.Println("Could not retrieve DNS records:", err)
 		os.Exit(1)
 		return
 	}
@@ -296,11 +296,14 @@ func main() {
 				if viper.GetBool("force") || !tooquick {
 
 					if viper.GetBool("force") {
-						fmt.Println("--force updating")
-						if tooquick {
-							fmt.Println("tooquick, but --force given")
+						if dodebug {
+							fmt.Println("Enabled: --force")
+							if tooquick {
+								fmt.Println("Update being forced when less than laste change occured within wait time")
+							}
 						}
 					}
+
 					fmt.Printf("Record last updated %d seconds ago, wait time currently %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
 					if dodebug {
 						fmt.Println("New DNS Record:")
@@ -340,8 +343,8 @@ func getIP(ipprovider string) string {
 	returnip = strings.TrimSuffix(returnip, "\n")
 
 	if dodebug {
-		fmt.Println("using: ", ipprovider)
-		fmt.Println("ip:", returnip)
+		fmt.Println("IP Provider:", ipprovider)
+		fmt.Println("IP:", returnip)
 	}
 
 	if err != nil {
@@ -361,7 +364,7 @@ func updatednsrecord(myapi cloudflare.API, zoneID string, recordID string, newdn
 			os.Exit(1)
 			return
 		}
-		fmt.Println("Updated DNS record: ", recordID)
+		fmt.Println("Updated DNS record:", recordID)
 	} else {
 		fmt.Println("Dry run complete")
 	}
@@ -371,7 +374,7 @@ func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflar
 	if viper.GetBool("doit") {
 		recs, err := myapi.CreateDNSRecord(zoneID, newdnsrecord)
 		if err != nil {
-			fmt.Println("Could not create DNS record: ", err)
+			fmt.Println("Could not create DNS record:", err)
 			os.Exit(1)
 			return
 		}
@@ -388,7 +391,7 @@ func creatednsrecord(myapi cloudflare.API, zoneID string, newdnsrecord cloudflar
 
 func validaterecordtype(recordtype string) bool {
 	if dodebug {
-		fmt.Println("Validating: --type ", recordtype)
+		fmt.Println("Validating: --type", recordtype)
 	}
 
 	recordtype = strings.ToUpper(recordtype)
@@ -404,7 +407,7 @@ func validaterecordtype(recordtype string) bool {
 
 func validateipprovider(ipname string) bool {
 	if dodebug {
-		fmt.Println("Validating: --iprovider ", ipname)
+		fmt.Println("Validating: --iprovider", ipname)
 	}
 
 	ipname = strings.ToLower(ipname)
@@ -424,7 +427,7 @@ func validateipprovider(ipname string) bool {
 
 func validateipv4(ipv4 string) bool {
 	if dodebug {
-		fmt.Println("Validatingi: --ipv4 ", ipv4)
+		fmt.Println("Validatingi: --ipv4", ipv4)
 	}
 
 	if net.ParseIP(ipv4) != nil {
@@ -448,7 +451,7 @@ func prettyPrint(i interface{}) string {
 
 func validatettl(checkttl string) bool {
 	if dodebug {
-		fmt.Println("Validating: --ttl ", checkttl)
+		fmt.Println("Validating: --ttl", checkttl)
 	}
 
 	checkttl = strings.ToLower(checkttl)
