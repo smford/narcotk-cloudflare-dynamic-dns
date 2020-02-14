@@ -218,6 +218,7 @@ func main() {
 			}
 
 			if viper.GetBool("showcurrent") {
+				fmt.Println("Current DNS record:")
 				fmt.Println(prettyPrint(r))
 			}
 
@@ -295,13 +296,14 @@ func main() {
 							fmt.Println("tooquick, but --force given")
 						}
 					}
-					fmt.Printf("Record last updated %d seconds ago, wait time set to %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
+					fmt.Printf("Record last updated %d seconds ago, wait time currently %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
 					if dodebug {
+						fmt.Println("New DNS Record:")
 						fmt.Println(prettyPrint(newdnsrecord))
 					}
 					updatednsrecord(*api, zoneID, r.ID, newdnsrecord)
 				} else {
-					fmt.Printf("Not updating record because it was last updated %d seconds ago and wait time set to %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
+					fmt.Printf("Not updating record because it was last updated %d seconds ago and wait time currently %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
 				}
 			}
 
