@@ -16,6 +16,7 @@ Suitable for running upon Linux, OSX, RaspberryPi and Ubiquiti Edgerouters
 - multiple external IP detection methods
 - supports all cloudflare DNS record types: A, AAAA, CAA, CERT, CNAME, DNSKEY, DS, LOC, MX, NAPTR, NS, PTR, SMIMEA, SPF, SRV, SSHFP, TLSA, TXT, URI
 - logging capability
+- you can be notified of changes via pushover.net
 
 ## Supported Platforms
 

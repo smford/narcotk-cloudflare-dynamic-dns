@@ -225,7 +225,8 @@ func main() {
 
 	if len(recs) == 0 {
 		fmt.Printf("No record found for %s.%s, Creating DNS Record.\n", dnsname, domain)
-		pushovermessage = pushovermessage + fmt.Sprintf("Creating DNS record: %s.%s\n", dnsname, domain)
+
+		pushovermessage = pushovermessage + fmt.Sprintf("Name: %s.%s\nType: %s\nContent: %s\nProxied: %t\nTTL: %d\n", newdnsrecord.Name, domain, newdnsrecord.Type, newdnsrecord.Content, newdnsrecord.Proxied, newdnsrecord.TTL)
 
 		if dodebug || viper.GetBool("shownew") {
 			fmt.Println("New DNS Record:")
@@ -233,6 +234,20 @@ func main() {
 		}
 
 		creatednsrecord(*api, zoneID, newdnsrecord)
+
+		if enablepushover {
+			pushovermessage = pushovermessage + fmt.Sprintf("Time: %s", time.Now().UTC())
+			if dodebug {
+				fmt.Printf("Pushover Message:\n%s\n---\n", pushovermessage)
+			}
+			if viper.GetBool("doit") {
+				sendpushover(pushoverapp, pushoverrecipient, pushovermessage, fmt.Sprintf("Creating DNS record: %s.%s\n", dnsname, domain), 0)
+			} else {
+				if dodebug {
+					fmt.Println("Simulating sending pushover notification")
+				}
+			}
+		}
 
 	} else {
 		if dodebug {
@@ -338,10 +353,17 @@ func main() {
 						fmt.Println("Updated DNS Record:")
 						fmt.Println(prettyPrint(newdnsrecord))
 					}
+
 					updatednsrecord(*api, zoneID, r.ID, newdnsrecord)
+
+					pushovermessage = pushovermessage + fmt.Sprintf("Time: %s", timenow)
+
 					if enablepushover {
+						if dodebug {
+							fmt.Printf("Pushover Message:\n%s\n---\n", pushovermessage)
+						}
 						if viper.GetBool("doit") {
-							sendpushover(pushoverapp, pushoverrecipient, pushovermessage, "update domain:"+"some domain", 0)
+							sendpushover(pushoverapp, pushoverrecipient, pushovermessage, fmt.Sprintf("Updating DNS record: %s.%s\n", dnsname, domain), 0)
 						} else {
 							if dodebug {
 								fmt.Println("Simulating sending pushover notification")
