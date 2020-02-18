@@ -51,6 +51,9 @@ GO111MODULE=on go build narcotk-cf-ddns.go
 
 
 ### GO
+```
+go get -v github.com/smford/narcotk-cloudflare-dynamic-dns
+```
 
 ### Linux
 
