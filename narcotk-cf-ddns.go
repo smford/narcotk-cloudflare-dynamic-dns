@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	cloudflare "github.com/cloudflare/cloudflare-go"
+	"github.com/gregdel/pushover"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"io/ioutil"
@@ -53,6 +54,11 @@ var (
 	}
 
 	recordtypes = []string{"A", "AAAA", "CAA", "CERT", "CNAME", "DNSKEY", "DS", "LOC", "MX", "NAPTR", "NS", "PTR", "SMIMEA", "SPF", "SRV", "SSHFP", "TLSA", "TXT", "URI"}
+
+	enablepushover    bool
+	pushoverapp       string
+	pushovermessage   string
+	pushoverrecipient string
 )
 
 func init() {
@@ -67,6 +73,7 @@ func init() {
 	flag.String("host", "test1", "Hostname, default = test1")
 	flag.String("ipv4", "", "IPv4 address to use, rather than auto detecting it")
 	flag.String("ipprovider", "aws", "Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
+	flag.Bool("pushover", false, "Enable Pushover.net notifications")
 	flag.Bool("showcurrent", false, "Show current DNS record")
 	flag.Bool("shownew", false, "Show new/updated DNS record")
 	flag.String("ttl", "5m", "TTL for DNS record. Valid choices: auto, 2m, 5m, 10m, 15m, 30m, 1h, 2h, 5h, 12h, 1d, default = \"5m\"")
@@ -79,6 +86,8 @@ func init() {
 	viper.BindEnv("API_KEY")
 	viper.BindEnv("DOMAIN")
 	viper.BindEnv("HOST")
+	viper.BindEnv("PUSHOVERAPP")
+	viper.BindEnv("PUSHOVERRECIPIENT")
 
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	pflag.Parse()
@@ -95,6 +104,10 @@ func init() {
 	dnsname = viper.GetString("HOST")
 	domain = viper.GetString("DOMAIN")
 	user = viper.GetString("API_EMAIL")
+	pushoverapp = viper.GetString("PUSHOVERAPP")
+	pushoverrecipient = viper.GetString("PUSHOVERRECIPIENT")
+
+	enablepushover = viper.GetBool("pushover")
 
 	// if we are forcing things, we also want to --doit
 	if viper.GetBool("force") {
@@ -116,6 +129,7 @@ func displayHelp() {
 	fmt.Println("    --host                  Host")
 	fmt.Println("    --ipv4                  IPv4 address to use, rather than auto detecting it")
 	fmt.Println("    --ipprovider            Provider of your external IP, \"aws\", \"ipify\" or \"my-ip.io\", default = aws")
+	fmt.Println("    --pushover              Enable Pushover.net notifications")
 	fmt.Println("    --showcurrent           Show current DNS record")
 	fmt.Println("    --shownew               Show new/updated DNS record")
 	fmt.Println("    --ttl                   TTL for DNS record. Valid choices: auto, 2m, 5m, 10m, 15m, 30m, 1h, 2h, 5h, 12h, 1d, default = \"5m\"")
@@ -211,6 +225,7 @@ func main() {
 
 	if len(recs) == 0 {
 		fmt.Printf("No record found for %s.%s, Creating DNS Record.\n", dnsname, domain)
+		pushovermessage = pushovermessage + fmt.Sprintf("Creating DNS record: %s.%s\n", dnsname, domain)
 
 		if dodebug || viper.GetBool("shownew") {
 			fmt.Println("New DNS Record:")
@@ -319,6 +334,10 @@ func main() {
 						fmt.Println(prettyPrint(newdnsrecord))
 					}
 					updatednsrecord(*api, zoneID, r.ID, newdnsrecord)
+					if enablepushover {
+						// sendpushover(poapp string, porecipient string, pomessage string, potitle string, popriority int)
+						sendpushover(pushoverapp, pushoverrecipient, pushovermessage, "update domain:"+"some domain", 0)
+					}
 				} else {
 					fmt.Printf("Not updating record because it was last updated %d seconds ago and wait time currently %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
 				}
@@ -475,4 +494,19 @@ func validatettl(checkttl string) bool {
 	}
 
 	return false
+}
+
+func sendpushover(poapp string, porecipient string, pomessage string, potitle string, popriority int) {
+	app := pushover.New(poapp)
+	recipient := pushover.NewRecipient(porecipient)
+	message := pushover.NewMessage(pomessage)
+	message.Title = potitle
+	message.Priority = popriority
+	response, err := app.SendMessage(message, recipient)
+	if err != nil {
+		fmt.Println("Pushover Error:", err)
+	}
+	if dodebug {
+		fmt.Println(response)
+	}
 }
