@@ -1,0 +1,17 @@
+api_email: something@example.com
+api_key: abcdefghijklmNOPQRSTUVWXY
+debug: true
+doit: true
+domain: example.com
+force: true
+host: test-hostname
+ipprovider: aws
+ipv4: 10.10.10.10
+pushover: true
+pushoverapp: abcdefghijklmNOPQRSTUVWXYZ
+pushoverrecipient: abcdefghijklmNOPQRSTUVWXYZ
+showcurrent: false
+shownew: false
+ttl: 15m
+type: A
+wait: 300
