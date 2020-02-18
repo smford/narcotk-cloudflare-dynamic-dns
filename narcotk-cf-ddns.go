@@ -12,6 +12,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -63,6 +64,7 @@ var (
 
 func init() {
 	flag.Bool("cfproxy", false, "Make Cloudflare proxy the record, default = false")
+	flag.String("config", "config.yaml", "Configuration file: /path/to/file.yaml, default = ./config.yaml")
 	flag.Bool("debug", false, "Display debug information")
 	flag.Bool("displayconfig", false, "Display configuration")
 	flag.Bool("doit", false, "Disable dry-run and make changes")
@@ -95,6 +97,30 @@ func init() {
 
 	dodebug = viper.GetBool("debug")
 
+	configdir, configfile := filepath.Split(viper.GetString("config"))
+
+	// set default configuration directory to current directory
+	if configdir == "" {
+		configdir = "."
+	}
+
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(configdir)
+
+	config := strings.TrimSuffix(configfile, ".yaml")
+	config = strings.TrimSuffix(config, ".yml")
+
+	viper.SetConfigName(config)
+	err := viper.ReadInConfig()
+
+	if err != nil {
+		fmt.Println("ERROR: No config file found")
+		if dodebug {
+			fmt.Printf("%s\n", err)
+		}
+		os.Exit(1)
+	}
+
 	if viper.GetBool("help") {
 		displayHelp()
 		os.Exit(0)
@@ -120,6 +146,7 @@ func displayHelp() {
 	fmt.Println("cf-ddns - Dynamic DNS updater for Cloudflare")
 	fmt.Println("")
 	fmt.Println("    --cfproxy               Make Cloudflare proxy the record, default = false")
+	fmt.Println("    --config                Configuration file: /path/to/file.yaml, default = ./config.yaml")
 	fmt.Println("    --displayconfig         Display configuration")
 	fmt.Println("    --doit                  Disable dry-run and make changes")
 	fmt.Println("    --domain                Domain")
