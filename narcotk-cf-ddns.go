@@ -95,8 +95,6 @@ func init() {
 	pflag.Parse()
 	viper.BindPFlags(pflag.CommandLine)
 
-	dodebug = viper.GetBool("debug")
-
 	configdir, configfile := filepath.Split(viper.GetString("config"))
 
 	// set default configuration directory to current directory
@@ -114,12 +112,11 @@ func init() {
 	err := viper.ReadInConfig()
 
 	if err != nil {
-		fmt.Println("ERROR: No config file found")
-		if dodebug {
-			fmt.Printf("%s\n", err)
-		}
+		fmt.Println("ERROR: No config file found:", err)
 		os.Exit(1)
 	}
+
+	dodebug = viper.GetBool("debug")
 
 	if viper.GetBool("help") {
 		displayHelp()
