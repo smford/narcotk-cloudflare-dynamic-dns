@@ -3,12 +3,15 @@ A simple Cloudflare Dynamic DNS updater.
 
 It detects changes do your external IP and updates Cloudflare DNS.
 
-Suitable for running upon Linux, OSX, RaspberryPi and Ubiquiti Edgerouters
+Suitable for running upon Linux, OSX, RaspberryPi and Ubiquiti Edgerouters.
+
+Can use pushover.net to notify you of any changes.
 
 ## Features
 
 - detects changes to your external IP and updates your cloudflare DNS entries
 - fully configurable
+- can be configured by environment variables, configuration file or from the command line
 - compatible with linux, osx, QNAP, raspberry pi, ubiquiti edge routers + more
 - clean and lean: a single binary, no mess and no further dependancies
 - simple to install and configure
@@ -16,7 +19,7 @@ Suitable for running upon Linux, OSX, RaspberryPi and Ubiquiti Edgerouters
 - multiple external IP detection methods
 - supports all cloudflare DNS record types: A, AAAA, CAA, CERT, CNAME, DNSKEY, DS, LOC, MX, NAPTR, NS, PTR, SMIMEA, SPF, SRV, SSHFP, TLSA, TXT, URI
 - logging capability
-- you can be notified of changes via pushover.net
+- you can be notified of DNS changes via pushover.net
 
 ## Supported Platforms
 
