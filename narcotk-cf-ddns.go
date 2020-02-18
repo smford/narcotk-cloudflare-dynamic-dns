@@ -253,6 +253,7 @@ func main() {
 
 			if strings.ToLower(r.Type) != strings.ToLower(newdnsrecord.Type) {
 				changed = true
+				pushovermessage = pushovermessage + fmt.Sprintf("Type change: %s -> %s\n", r.Type, newdnsrecord.Type)
 				if dodebug {
 					fmt.Printf("Type change: %s -> %s\n", r.Type, newdnsrecord.Type)
 				}
@@ -262,6 +263,7 @@ func main() {
 			// change to name will create aw new record and leave the old one in place
 			if strings.ToLower(r.Name) != (strings.ToLower(newdnsrecord.Name + "." + domain)) {
 				changed = true
+				pushovermessage = pushovermessage + fmt.Sprintf("Name change: %s -> %s\n", r.Name, newdnsrecord.Name)
 				if dodebug {
 					fmt.Printf("Name change: %s -> %s\n", r.Name, newdnsrecord.Name)
 				}
@@ -269,6 +271,7 @@ func main() {
 
 			if r.Content != newdnsrecord.Content {
 				changed = true
+				pushovermessage = pushovermessage + fmt.Sprintf("Content change: %s -> %s\n", r.Content, newdnsrecord.Content)
 				if dodebug {
 					fmt.Printf("Content change: %s -> %s\n", r.Content, newdnsrecord.Content)
 				}
@@ -276,6 +279,7 @@ func main() {
 
 			if r.Proxied != newdnsrecord.Proxied {
 				changed = true
+				pushovermessage = pushovermessage + fmt.Sprintf("Proxied change: %t -> %t\n", r.Proxied, newdnsrecord.Proxied)
 				if dodebug {
 					fmt.Printf("Proxied change: %t -> %t\n", r.Proxied, newdnsrecord.Proxied)
 				}
@@ -283,6 +287,7 @@ func main() {
 
 			if r.TTL != newdnsrecord.TTL {
 				changed = true
+				pushovermessage = pushovermessage + fmt.Sprintf("TTL change: %d -> %d\n", r.TTL, newdnsrecord.TTL)
 				if dodebug {
 					fmt.Printf("TTL change: %d -> %d\n", r.TTL, newdnsrecord.TTL)
 				}
@@ -335,8 +340,13 @@ func main() {
 					}
 					updatednsrecord(*api, zoneID, r.ID, newdnsrecord)
 					if enablepushover {
-						// sendpushover(poapp string, porecipient string, pomessage string, potitle string, popriority int)
-						sendpushover(pushoverapp, pushoverrecipient, pushovermessage, "update domain:"+"some domain", 0)
+						if viper.GetBool("doit") {
+							sendpushover(pushoverapp, pushoverrecipient, pushovermessage, "update domain:"+"some domain", 0)
+						} else {
+							if dodebug {
+								fmt.Println("Simulating sending pushover notification")
+							}
+						}
 					}
 				} else {
 					fmt.Printf("Not updating record because it was last updated %d seconds ago and wait time currently %d seconds\n", int64(timediff), int64(viper.GetInt("wait")))
